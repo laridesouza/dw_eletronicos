@@ -1,0 +1,40 @@
+# Biblioteca utilizada internamente pelo SQLAlchemy
+# para operações assíncronas e gerenciamento interno.
+greenlet==3.5.0
+
+# Biblioteca principal para operações numéricas
+# e manipulação eficiente de arrays/matrizes.
+# O pandas utiliza numpy internamente.
+numpy==2.4.6
+
+# Biblioteca principal para manipulação de dados,
+# leitura de CSVs e transformação de DataFrames.
+pandas==3.0.3
+
+# Driver de conexão Python → PostgreSQL.
+# Permite conexão entre Python e banco PostgreSQL.
+psycopg2-binary==2.9.12
+
+# Biblioteca para manipulação de datas e horários.
+# Utilizada internamente pelo pandas.
+python-dateutil==2.9.0.post0
+
+# Biblioteca responsável por carregar
+# variáveis de ambiente do arquivo .env.
+python-dotenv==1.2.2
+
+# Biblioteca auxiliar de compatibilidade Python.
+# Utilizada internamente por outras dependências.
+six==1.17.0
+
+# ORM e engine de conexão SQL utilizada
+# para comunicação entre Python e PostgreSQL.
+SQLAlchemy==2.0.49
+
+# Biblioteca auxiliar para tipagem Python.
+# Muito utilizada internamente por frameworks modernos.
+typing_extensions==4.15.0
+
+# Biblioteca de timezone utilizada pelo pandas
+# para tratamento de datas e horários.
+tzdata==2026.2
