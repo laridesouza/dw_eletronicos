@@ -1,33 +1,62 @@
 # Data Warehouse de Eletrônicos
  
-Projeto de Engenharia de Dados que constrói um Data Warehouse do zero a partir de arquivos CSV de **vendas**, **estoque** e **devoluções** de uma operação de eletrônicos. Os dados passam por três camadas e chegam a um modelo dimensional pronto para análise.
- 
-## Stack
- 
-Python · PostgreSQL · SQLAlchemy · SQL (procedures) · DBeaver
+Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e **devoluções** de uma operação de eletrônicos. Os dados passam por três camadas (`raw` → `staging` → `dw`) e chegam a um modelo dimensional (Star Schema) pronto para análise.
  
 ## Arquitetura
  
-```
-CSVs  ──►  RAW  ──►  STAGING  ──►  DW
-          bruto      tratado     analítico
+```mermaid
+flowchart LR
+    A[("CSVs<br/>vendas, estoque, devoluções")] -->|"Python + SQLAlchemy"| B["RAW<br/>dado bruto"]
+    B -->|"procedures SQL<br/>limpeza + UPSERT"| C["STAGING<br/>dado tratado"]
+    C -->|"procedures SQL<br/>dimensões e fatos"| D["DW<br/>Star Schema"]
 ```
  
 | Camada | Função |
 |---|---|
-| **raw** | Dados exatamente como chegam dos CSVs, sem transformação. |
+| **raw** | Dados exatamente como chegam, sem chaves e sem transformação. Permite reprocessar sem perder o original. |
 | **staging** | Dados limpos e padronizados, com chaves primárias que impedem duplicidade. |
-| **dw** | Modelo dimensional (Star Schema) com tabelas fato e dimensão. |
+| **dw** | Modelo dimensional com fatos e dimensões, voltado para análise. |
  
 ## Modelo dimensional
  
-- **Dimensões:** tempo, produto, cliente, localidade, canal de venda e forma de pagamento
-- **Fatos:** vendas, devoluções e estoque
-## Como funciona
+```mermaid
+erDiagram
+    DIM_TEMPO ||--o{ FATO_VENDAS : sk_tempo
+    DIM_PRODUTO ||--o{ FATO_VENDAS : sk_produto
+    DIM_CLIENTE ||--o{ FATO_VENDAS : sk_cliente
+    DIM_LOCALIDADE ||--o{ FATO_VENDAS : sk_localidade
+    DIM_CANAL_VENDA ||--o{ FATO_VENDAS : sk_canal_venda
+    DIM_PAGAMENTO ||--o{ FATO_VENDAS : sk_pagamento
+    DIM_TEMPO ||--o{ FATO_DEVOLUCOES : sk_tempo
+    DIM_PRODUTO ||--o{ FATO_DEVOLUCOES : sk_produto
+    DIM_CLIENTE ||--o{ FATO_DEVOLUCOES : sk_cliente
+    DIM_PRODUTO ||--|| FATO_ESTOQUE : sk_produto
+```
  
-- Toda a transformação e carga é feita com **procedures em SQL**, reutilizáveis e chamadas por uma procedure principal que executa o pipeline na ordem certa (dimensões primeiro, fatos depois).
-- As cargas usam **UPSERT** (`ON CONFLICT`): se o registro existe, atualiza; se não, insere. Assim o pipeline pode rodar várias vezes sem duplicar dados.
-- O Python é usado para conectar ao banco e carregar os CSVs na camada raw.
+- **Fatos:** `fato_vendas`, `fato_devolucoes`, `fato_estoque`
+- **Dimensões:** `dim_tempo`, `dim_produto`, `dim_cliente`, `dim_localidade`, `dim_canal_venda`, `dim_pagamento`
+- **Chaves surrogadas (`sk_`)** identificam os registros das dimensões; as chaves naturais (`pedido_id`, `cliente_id`...) vêm da origem.
+- **`dim_tempo`** é um calendário contínuo (do primeiro ao último ano dos dados), com nomes de meses e dias em português.
+## Decisões de projeto
+ 
+- **Três camadas:** isolam o dado bruto, o tratamento e o consumo. Se algo der errado, dá para reprocessar a partir da camada anterior.
+- **Procedures SQL:** a lógica de transformação fica no banco, é reutilizável e executada em ordem por uma procedure principal (`dw.sp_run_dw`): dimensões primeiro, fatos depois.
+- **UPSERT (`ON CONFLICT`):** o pipeline pode ser executado várias vezes sem duplicar dados (carga idempotente).
+- **Tratamentos na staging:** `TRIM`, `COALESCE` (desconto e frete vazios viram zero), `UPPER`/`INITCAP`, `ROUND`, `EXTRACT` (ano e mês) e conversão de texto para `DATE`.
+## Resultado
+ 
+| Tabela | Registros |
+|---|---|
+| `stg_vendas` / `fato_vendas` | 3.000 |
+| `stg_devolucoes` / `fato_devolucoes` | 210 |
+| `stg_estoque` / `fato_estoque` | 12 |
+ 
+<!-- Adicione aqui um print do modelo no DBeaver (ER Diagram) -->
+ 
+## Stack
+ 
+Python · PostgreSQL · SQLAlchemy · SQL (PL/pgSQL) · DBeaver
+ 
 ## Como executar
  
 ```bash
@@ -36,7 +65,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
  
-Crie um arquivo `.env` na raiz (não o versione) com os dados de conexão:
+Crie um `.env` na raiz (não versione):
  
 ```dotenv
 DB_HOST=localhost
@@ -46,22 +75,22 @@ DB_USER=postgres
 DB_PASSWORD=sua_senha
 ```
  
-Teste a conexão e execute o pipeline:
- 
 ```bash
-python3 scripts/teste_conexao.py
+python3 scripts/teste_conexao.py   # valida a conexão
 ```
  
 ```sql
-CALL dw.sp_run_dw();
+CALL dw.sp_run_dw();               -- carrega dimensões e fatos
 ```
  
-## Desafio: conexão com o PostgreSQL no WSL
+## Desafio: PostgreSQL no WSL
  
-A conexão do Python com o PostgreSQL falhava com `Connection refused`. O banco estava instalado no Windows, enquanto o código rodava no WSL, onde `localhost` aponta para o próprio Linux. Como o Windows 10 não oferece o modo de rede espelhada, a solução foi instalar uma instância do PostgreSQL dentro do WSL, na porta 5433 para evitar conflito com a do Windows, e atualizar o `.env`. Como o WSL não mantém o serviço ativo entre sessões, é preciso iniciá-lo com `sudo service postgresql start` ao retomar o trabalho.
+A conexão do Python falhava com `Connection refused`: o banco estava no Windows e o código rodava no WSL, onde `localhost` aponta para o próprio Linux. Como o Windows 10 não tem rede espelhada, a solução foi instalar o PostgreSQL dentro do WSL, na porta 5433 (evitando conflito com a instância do Windows), e atualizar o `.env`.
  
 ## Aprendizados
  
-- Separar os dados em camadas permite reprocessar tudo sem perder o dado original.
-- Chave natural vem da origem; chave surrogada é criada pelo DW para identificar registros nas dimensões.
+- Separar em camadas permite reprocessar sem perder o dado original.
 - UPSERT torna o pipeline idempotente.
+- Chave natural vem da origem; chave surrogada é criada pelo DW.
+- Um calendário contínuo é pré-requisito para análises de tempo.
+ 
