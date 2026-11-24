@@ -4,9 +4,7 @@ Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e
  
 ## Arquitetura
  
-<p align="center">
-  <img src="img/arquitetura_dw_eletronicos.png" alt="Arquitetura DW" width="800">
-</p>
+
  
 | Camada | Função |
 |---|---|
