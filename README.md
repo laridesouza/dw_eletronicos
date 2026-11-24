@@ -4,12 +4,9 @@ Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e
  
 ## Arquitetura
  
-```mermaid
-flowchart LR
-    A[("CSVs<br/>vendas, estoque, devoluções")] -->|"Python + SQLAlchemy"| B["RAW<br/>dado bruto"]
-    B -->|"procedures SQL<br/>limpeza + UPSERT"| C["STAGING<br/>dado tratado"]
-    C -->|"procedures SQL<br/>dimensões e fatos"| D["DW<br/>Star Schema"]
-```
+<p align="center">
+  <img src="img/arquitetura_dw_eletronicos.png" alt="Arquitetura DW" width="500">
+</p>
  
 | Camada | Função |
 |---|---|
