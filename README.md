@@ -4,9 +4,7 @@ Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e
  
 ## Arquitetura
  
-<p align="center">
-  <img src="img/dw_eletronicos_arquitetura.png" alt="Arquitetura DW" width="1000">
-</p>
+
  
 | Camada | Função |
 |---|---|
@@ -16,19 +14,9 @@ Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e
  
 ## Modelo dimensional
  
-```mermaid
-erDiagram
-    DIM_TEMPO ||--o{ FATO_VENDAS : sk_tempo
-    DIM_PRODUTO ||--o{ FATO_VENDAS : sk_produto
-    DIM_CLIENTE ||--o{ FATO_VENDAS : sk_cliente
-    DIM_LOCALIDADE ||--o{ FATO_VENDAS : sk_localidade
-    DIM_CANAL_VENDA ||--o{ FATO_VENDAS : sk_canal_venda
-    DIM_PAGAMENTO ||--o{ FATO_VENDAS : sk_pagamento
-    DIM_TEMPO ||--o{ FATO_DEVOLUCOES : sk_tempo
-    DIM_PRODUTO ||--o{ FATO_DEVOLUCOES : sk_produto
-    DIM_CLIENTE ||--o{ FATO_DEVOLUCOES : sk_cliente
-    DIM_PRODUTO ||--|| FATO_ESTOQUE : sk_produto
-```
+<p align="center">
+  <img src="img/dw_eletronicos_star_schema.png" alt="Modelo DW" width="1000">
+</p>
  
 - **Fatos:** `fato_vendas`, `fato_devolucoes`, `fato_estoque`
 - **Dimensões:** `dim_tempo`, `dim_produto`, `dim_cliente`, `dim_localidade`, `dim_canal_venda`, `dim_pagamento`
