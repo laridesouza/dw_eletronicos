@@ -3,7 +3,9 @@
 Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e **devoluções** de uma operação de eletrônicos. Os dados passam por três camadas (`raw` → `staging` → `dw`) e chegam a um modelo dimensional (Star Schema) pronto para análise.
  
 ## Arquitetura
- 
+ <p align="center">
+  <img src="img/dw_eletronicos_arquitetura.png" alt="Arquitetura DW" width="1000">
+</p>
 
  
 | Camada | Função |
@@ -15,7 +17,7 @@ Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e
 ## Modelo dimensional
  
 <p align="center">
-  <img src="img/dw_eletronicos_star_schema.png" alt="Modelo DW" width="1000">
+  <img src="img/dw_eletronicos_star_schema.png" alt="Modelo DW" width="500">
 </p>
  
 - **Fatos:** `fato_vendas`, `fato_devolucoes`, `fato_estoque`
