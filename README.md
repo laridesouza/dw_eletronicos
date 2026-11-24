@@ -17,7 +17,7 @@ Data Warehouse construído do zero a partir de CSVs de **vendas**, **estoque** e
 ## Modelo dimensional
  
 <p align="center">
-  <img src="img/dw_eletronicos_star_schema.png" alt="Modelo DW" width="500">
+  <img src="img/dw_eletronicos_star_schema.png" alt="Modelo DW" width="750">
 </p>
  
 - **Fatos:** `fato_vendas`, `fato_devolucoes`, `fato_estoque`
