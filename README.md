@@ -80,4 +80,3 @@ A conexão do Python falhava com `Connection refused`: o banco estava no Windows
 - UPSERT torna o pipeline idempotente.
 - Chave natural vem da origem; chave surrogada é criada pelo DW.
 - Um calendário contínuo é pré-requisito para análises de tempo.
- 
